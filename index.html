@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>周口市烟草专卖局（公司） · 发展党员人员画像系统</title>
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+<!-- 顶部装饰光带 -->
+<div class="top-glow"></div>
+
+<div class="app">
+  <!-- 顶部栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <img class="emblem" src="assets/images/logo.png" alt="图强先锋 LOGO">
+      <div class="brand-text">
+        <div class="brand-title">周口市烟草专卖局（公司）</div>
+        <div class="brand-sub">发展党员人员画像 · 积分制管理</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="scope-tag">数据范围：全市系统内部</div>
+      <div id="dataSourceBadge" class="source-badge demo">示例数据</div>
+      <div class="clock" id="clock">--:--:--</div>
+      <button id="importToggle" class="import-toggle" aria-pressed="false" title="显示/隐藏 数据导入面板">
+        <span class="dot"></span> 数据导入
+      </button>
+    </div>
+  </header>
+
+  <div class="body">
+    <!-- 侧边导航 -->
+    <nav class="sidebar" id="sidebar">
+      <a class="nav-item active" data-route="overview" href="#/overview">
+        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label">人员总览</span></a>
+      <a class="nav-item" data-route="profile" href="#/profile">
+        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><circle cx="12" cy="11" r="2.4"/><path d="M12 13.4V17"/></svg></span><span class="nav-label">人员画像</span></a>
+      <a class="nav-item" data-route="rank" href="#/rank">
+        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V10M12 21V4M19 21v-7"/><path d="M3 21h18"/></svg></span><span class="nav-label">积分排名</span></a>
+      <a class="nav-item" data-route="rules" href="#/rules">
+        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span><span class="nav-label">积分规则</span></a>
+      <a class="nav-item" data-route="manage" href="#/manage">
+        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span><span class="nav-label">数据管理</span></a>
+      <div class="sidebar-foot">中共周口市烟草专卖局（公司）党组</div>
+    </nav>
+
+    <!-- 主视图 -->
+    <main class="content" id="view"></main>
+  </div>
+</div>
+
+<!-- 数据导入抽屉（显示/隐藏开关控制） -->
+<div class="drawer-mask" id="drawerMask"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <div class="drawer-title"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></span> 数据导入 / 读取</div>
+    <button class="drawer-close" id="drawerClose" title="关闭">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="step">
+      <div class="step-no">1</div>
+      <div class="step-main">
+        <div class="step-title">下载导入模板</div>
+        <div class="step-desc">含【入党申请人信息】【填写说明】【积分权重说明】三张表，按模板填写后导入。</div>
+        <button class="btn btn-gold" id="btnTpl">⬇ 下载 Excel 导入模板</button>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-no">2</div>
+      <div class="step-main">
+        <div class="step-title">选择 Excel 文件</div>
+        <div class="step-desc">支持 .xlsx / .xls，读取后自动校验并刷新全部页面。</div>
+        <label class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept=".xlsx,.xls" hidden />
+          <div class="dz-inner">
+            <div class="dz-ico">⤓</div>
+            <div class="dz-text">点击选择 或 拖拽 Excel 到此处</div>
+            <div class="dz-hint" id="fileName">未选择文件</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-no">3</div>
+      <div class="step-main">
+        <div class="step-title">解析与校验</div>
+        <div class="step-desc">解析结果如下，确认无误后应用。</div>
+        <div id="parseResult" class="parse-result">尚未解析文件…</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-no">4</div>
+      <div class="step-main">
+        <div class="step-title">应用数据</div>
+        <div class="step-desc">应用后立即刷新全部页面；也可先载入示例数据预览效果。</div>
+        <div class="btn-row">
+          <button class="btn btn-red" id="btnApply" disabled>✓ 应用到大屏</button>
+          <button class="btn btn-ghost" id="btnDemo">载入示例数据</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btnExport">导出当前数据为 Excel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- 轻提示 -->
+<div id="toast" class="toast"></div>
+
+<script src="assets/js/echarts.min.js"></script>
+<script src="assets/js/xlsx.full.min.js"></script>
+<script src="demo-data.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
