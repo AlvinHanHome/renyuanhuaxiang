@@ -70,21 +70,21 @@
   function baseGrid() { return { left: 8, right: 18, top: 40, bottom: 8, containLabel: true }; }
   function axisStyle() {
     return {
-      axisLine: { lineStyle: { color: "rgba(255,209,102,.35)" } },
-      axisLabel: { color: "#F2D2A6", fontSize: 11 },
-      splitLine: { lineStyle: { color: "rgba(255,255,255,.06)" } }
+      axisLine: { lineStyle: { color: "rgba(200,22,29,.30)" } },
+      axisLabel: { color: "#8A6A52", fontSize: 13 },
+      splitLine: { lineStyle: { color: "rgba(200,22,29,.10)" } }
     };
   }
-  var C1 = "#FF5A3C", C2 = "#FFD166", C3 = "#FF9F45", C4 = "#E0231C", C5 = "#F2B33D";
-  var PIE = [C1, C2, C3, C4, C5, "#E0A23C", "#FFB23E", "#FF7A35"];
+  var C1 = "#C8161D", C2 = "#C99A00", C3 = "#E8762D", C4 = "#E5404A", C5 = "#EDD050";
+  var PIE = [C1, C2, C3, C4, C5, "#E8C266", "#E8553C", "#E8762D"];
 
   /* 各维度最大值（雷达轴固定 20） */
   var DIM_MAX = 20;
 
   /* ========== 通用 label 样式：柱状图/折线图顶部显示数值 ========== */
   var BAR_LABEL = {
-    show: true, position: "top", color: "#FFF7EC", fontSize: 11, fontWeight: 700,
-    formatter: "{c}", textShadowColor: "rgba(0,0,0,.6)", textShadowBlur: 3
+    show: true, position: "top", color: "#3A1418", fontSize: 13, fontWeight: 700,
+    formatter: "{c}", textShadowColor: "rgba(0,0,0,0)", textShadowBlur: 0
   };
 
   /* ---------- 雷达图（1 人或 2 人对比） ---------- */
@@ -95,11 +95,11 @@
       return {
         value: DIM.map(function (k) { return p.scores[k] || 0; }),
         name: p.name,
-        symbolSize: 5,
-        lineStyle: { width: 2.5, color: colors[i] },
+        symbolSize: 7,
+        lineStyle: { width: 3.5, color: colors[i] },
         itemStyle: { color: colors[i] },
-        areaStyle: { color: colors[i], opacity: persons.length > 1 ? 0.12 : 0.28 },
-        label: { show: true, formatter: "{c}", color: colors[i], fontSize: 11, fontWeight: 700 }
+        areaStyle: { color: colors[i], opacity: persons.length > 1 ? 0.20 : 0.28 },
+        label: { show: true, formatter: "{c}", color: colors[i], fontSize: 13, fontWeight: 700 }
       };
     });
     return {
@@ -110,18 +110,18 @@
           var d = params.data;
           var lines = ["<b>" + d.name + "</b>"];
           DIM.forEach(function (k, i) { lines.push(k + "：<b>" + d.value[i] + "</b> / " + DIM_MAX); });
-          lines.push("<span style='color:#FFD166'>总分：" + d.value.reduce(function (a, b) { return a + b; }, 0) + "</span>");
+          lines.push("<span style='color:#C8161D'>总分：" + d.value.reduce(function (a, b) { return a + b; }, 0) + "</span>");
           return lines.join("<br/>");
         }
       },
       legend: persons.length > 1 ? { data: persons.map(function (p) { return p.name; }),
-        textStyle: { color: "#FFF7EC" }, top: 0, itemWidth: 14, itemHeight: 8 } : { show: false },
+        textStyle: { color: "#3A1418", fontSize: 13 }, top: 0, itemWidth: 18, itemHeight: 10 } : { show: false },
       radar: {
         indicator: indicator, center: persons.length > 1 ? ["50%", "56%"] : ["50%", "52%"], radius: "66%",
-        axisName: { color: "#FFE7A8", fontSize: 12, fontWeight: 600 },
-        splitLine: { lineStyle: { color: "rgba(255,209,102,.22)" } },
-        splitArea: { areaStyle: { color: ["rgba(255,90,60,.04)", "rgba(255,209,102,.05)"] } },
-        axisLine: { lineStyle: { color: "rgba(255,209,102,.25)" } }
+        axisName: { color: "#8A6A52", fontSize: 13, fontWeight: 600 },
+        splitLine: { lineStyle: { color: "rgba(200,22,29,.18)" } },
+        splitArea: { areaStyle: { color: ["rgba(200,22,29,.03)", "rgba(232,194,102,.04)"] } },
+        axisLine: { lineStyle: { color: "rgba(200,22,29,.20)" } }
       },
       series: [{ type: "radar", data: seriesData }]
     };
@@ -132,10 +132,10 @@
     return {
       animation: true, animationDuration: 1000, animationEasing: "cubicOut", animationDelay: 400,
       tooltip: { trigger: "axis" },
-      legend: { data: [a.name, b.name], textStyle: { color: "#FFF7EC" }, top: 0, itemWidth: 14, itemHeight: 8 },
+      legend: { data: [a.name, b.name], textStyle: { color: "#3A1418", fontSize: 13 }, top: 0, itemWidth: 18, itemHeight: 10 },
       grid: baseGrid(),
-      xAxis: { type: "category", data: DIM, axisLine: { lineStyle: { color: "rgba(255,209,102,.35)" } },
-        axisLabel: { color: "#F2D2A6", fontSize: 11, interval: 0 } },
+      xAxis: { type: "category", data: DIM, axisLine: { lineStyle: { color: "rgba(200,22,29,.30)" } },
+        axisLabel: { color: "#8A6A52", fontSize: 13, interval: 0 } },
       yAxis: Object.assign({ type: "value", max: DIM_MAX }, axisStyle()),
       series: [
         { name: a.name, type: "bar", data: DIM.map(function (k) { return a.scores[k] || 0; }),
@@ -196,11 +196,12 @@
     makeChart("cStage", {
       animation: true, animationDuration: 1000, animationEasing: "cubicOut",
       tooltip: { trigger: "item", formatter: "{b}: {c}人 ({d}%)" },
-      legend: { bottom: 0, textStyle: { color: "#FFF7EC" }, itemWidth: 12, itemHeight: 8 },
+      legend: { bottom: 0, textStyle: { color: "#3A1418", fontSize: 13 }, itemWidth: 12, itemHeight: 8 },
       series: [{
         type: "pie", radius: ["42%", "68%"], center: ["50%", "45%"],
+        itemStyle: { borderColor: "rgba(255,255,255,.85)", borderWidth: 2, shadowBlur: 10, shadowColor: "rgba(150,70,30,.18)" },
         data: STAGES.map(function (s, i) { return { name: s, value: stageCnt[s], itemStyle: { color: PIE[i] } }; }),
-        label: { color: "#FFF7EC", fontSize: 12, fontWeight: 600, formatter: "{b}\n{c}人" }, labelLine: { lineStyle: { color: "rgba(255,209,102,.4)" } }
+        label: { color: "#3A1418", fontSize: 14, fontWeight: 600, formatter: "{b}\n{c}人" }, labelLine: { lineStyle: { color: "rgba(200,22,29,.35)" } }
       }]
     });
     // 横向柱状图 — 各县区人数（带数值标签，标签用简称、tooltip 显示全称）
@@ -211,7 +212,7 @@
       grid: baseGrid(),
       xAxis: Object.assign({ type: "value", max: Math.max.apply(null, countyArr.map(function (c) { return c.v; })) * 1.15 }, axisStyle()),
       yAxis: { type: "category", data: countyArr.map(function (c) { return countyShort(c.name); }),
-        axisLine: { lineStyle: { color: "rgba(255,209,102,.35)" } }, axisLabel: { color: "#F2D2A6", fontSize: 11 } },
+        axisLine: { lineStyle: { color: "rgba(200,22,29,.30)" } }, axisLabel: { color: "#8A6A52", fontSize: 13 } },
       series: [{ type: "bar", data: countyArr.map(function (c) { return c.v; }),
         itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
           { offset: 0, color: C4 }, { offset: 1, color: C2 }]), borderRadius: [0, 5, 5, 0] }, barWidth: "58%",
@@ -223,8 +224,8 @@
     makeChart("cJob", {
       animation: true, animationDuration: 800, animationEasing: "cubicOut",
       tooltip: { trigger: "axis" }, grid: baseGrid(),
-      xAxis: { type: "category", data: JOB, axisLine: { lineStyle: { color: "rgba(255,209,102,.35)" } },
-        axisLabel: { color: "#F2D2A6", fontSize: 11, interval: 0 } },
+      xAxis: { type: "category", data: JOB, axisLine: { lineStyle: { color: "rgba(200,22,29,.30)" } },
+        axisLabel: { color: "#8A6A52", fontSize: 13, interval: 0 } },
       yAxis: Object.assign({ type: "value" }, axisStyle()),
       series: [{ type: "bar", data: JOB.map(function (j) { return jobCnt[j]; }),
         itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -246,13 +247,13 @@
         }
       },
       radar: { indicator: indicator, center: ["50%", "52%"], radius: "66%",
-        axisName: { color: "#FFE7A8", fontSize: 12, fontWeight: 600 },
-        splitLine: { lineStyle: { color: "rgba(255,209,102,.22)" } },
-        splitArea: { areaStyle: { color: ["rgba(255,90,60,.04)", "rgba(255,209,102,.05)"] } },
-        axisLine: { lineStyle: { color: "rgba(255,209,102,.25)" } } },
+        axisName: { color: "#8A6A52", fontSize: 13, fontWeight: 600 },
+        splitLine: { lineStyle: { color: "rgba(200,22,29,.18)" } },
+        splitArea: { areaStyle: { color: ["rgba(200,22,29,.03)", "rgba(232,194,102,.04)"] } },
+        axisLine: { lineStyle: { color: "rgba(200,22,29,.20)" } } },
       series: [{ type: "radar", data: [{ value: dimAvg, name: "全员平均",
         lineStyle: { width: 2.5, color: C1 }, itemStyle: { color: C1 }, areaStyle: { color: C1, opacity: .3 },
-        label: { show: true, formatter: "{c}", color: "#FFF7EC", fontSize: 10 } }] }]
+        label: { show: true, formatter: "{c}", color: "#3A1418", fontSize: 12 } }] }]
     };
   }
 
@@ -436,7 +437,7 @@
     var dT = num(a.total - b.total);
     return '<div class="detail-grid">' +
       '<div class="compare-tip"><span class="pill">积分对标</span> 已选择两人，雷达图与维度明细并列对比' +
-      '<span style="margin-left:auto;color:#fff">总分差 <b style="color:var(--gold)">' + (dT >= 0 ? "+" : "") + dT + '</b> 分</span></div>' +
+      '<span style="margin-left:auto;color:#3A1418">总分差 <b style="color:var(--red)">' + (dT >= 0 ? "+" : "") + dT + '</b> 分</span></div>' +
       '<div class="detail-cols">' + infoCard(a) + infoCard(b) + '</div>' +
       '<div class="detail-cols">' + scoreCard(a) + scoreCard(b) + '</div>' +
       panel("五维积分对标雷达", '<div id="rCmp" class="chart h340"></div>', a.name + "（红） vs " + b.name + "（金）") +
@@ -516,7 +517,7 @@
         animation: true, animationDuration: 800, animationEasing: "cubicOut",
         tooltip: { trigger: "axis" }, grid: baseGrid(),
         xAxis: { type: "category", data: arr.map(function (p) { return p.name; }),
-          axisLine: { lineStyle: { color: "rgba(255,209,102,.35)" } }, axisLabel: { color: "#F2D2A6", fontSize: 11, interval: 0, rotate: 28 } },
+          axisLine: { lineStyle: { color: "rgba(200,22,29,.30)" } }, axisLabel: { color: "#8A6A52", fontSize: 13, interval: 0, rotate: 28 } },
         yAxis: Object.assign({ type: "value" }, axisStyle()),
         series: [{ type: "bar", data: arr.map(function (p) { return p.total; }),
           itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -536,9 +537,10 @@
         animation: true, animationDuration: 1000, animationEasing: "cubicOut",
         tooltip: { trigger: "item", formatter: "{b}: {c}人 ({d}%)" },
         series: [{ type: "pie", radius: ["40%", "68%"], center: ["50%", "46%"],
+          itemStyle: { borderColor: "rgba(255,255,255,.85)", borderWidth: 2, shadowBlur: 10, shadowColor: "rgba(150,70,30,.18)" },
           data: buckets.map(function (b) { return { name: b.n, value: b.c, itemStyle: { color: b.color } }; }),
-          label: { color: "#FFF7EC", fontSize: 12, fontWeight: 600, formatter: "{b}\n{c}人" }, labelLine: { lineStyle: { color: "rgba(255,209,102,.4)" } } }],
-        legend: { bottom: 0, textStyle: { color: "#FFF7EC" }, itemWidth: 12, itemHeight: 8 }
+          label: { color: "#3A1418", fontSize: 14, fontWeight: 600, formatter: "{b}\n{c}人" }, labelLine: { lineStyle: { color: "rgba(200,22,29,.35)" } } }],
+        legend: { bottom: 0, textStyle: { color: "#3A1418", fontSize: 13 }, itemWidth: 12, itemHeight: 8 }
       });
     }
     renderBody(sorted); renderTop(top10); renderBucket(STATE.people);
