@@ -345,3 +345,69 @@ select:focus,input[type=text]:focus{border-color:var(--red)}
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .content{padding:14px}
 }
+
+/* 积分全方位结果运用 */
+.apply-card .ac-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.apply-card .ac-ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:20px;font-weight:800;flex:0 0 42px;box-shadow:0 4px 10px rgba(150,70,30,.18)}
+.apply-card .ac-stage{font-size:15px;font-weight:800;color:var(--text);letter-spacing:.5px}
+.apply-card .ac-tag{display:inline-block;margin-top:5px;padding:2px 11px;border-radius:11px;color:#fff;font-size:11px;font-weight:700;letter-spacing:1px}
+.apply-card .ac-desc{font-size:13px;line-height:1.85;color:var(--text);margin-bottom:10px}
+
+/* 积分结果运用 · 可视化看板 */
+.apply-tabs{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.apply-tab{border:1px solid var(--line);background:rgba(255,255,255,.6);color:var(--muted);
+  padding:10px 20px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:.2s;letter-spacing:.4px}
+.apply-tab:hover{border-color:var(--gold);color:var(--text)}
+.apply-tab.active{background:linear-gradient(135deg,var(--red),#8e0f14);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(200,22,29,.28)}
+
+.apply-ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:16px 22px;padding:14px 18px;
+  background:linear-gradient(160deg,rgba(200,22,29,.06),rgba(232,194,102,.08));border:1px solid var(--line-soft);border-radius:12px;margin-bottom:16px}
+.apply-ctrl .lbl{font-size:13px;font-weight:700;color:var(--text)}
+.apply-ctrl .grp{display:flex;align-items:center;gap:8px}
+.apply-input{width:72px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-weight:800;
+  color:var(--red);background:#fff;text-align:center;font-variant-numeric:tabular-nums}
+.apply-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,194,102,.25)}
+.apply-note{font-size:12px;color:var(--muted);margin-left:auto;max-width:420px;line-height:1.6}
+
+.kpi-row.cols-4{grid-template-columns:repeat(4,1fr)}
+
+.apply-banner{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;margin-bottom:16px;font-size:14px;line-height:1.65;font-weight:600}
+.apply-banner .bi{font-size:22px;flex:0 0 auto}
+.apply-banner.stop{background:linear-gradient(135deg,rgba(200,22,29,.12),rgba(200,22,29,.05));border:1px solid rgba(200,22,29,.3);color:#8e0f14}
+.apply-banner.go{background:linear-gradient(135deg,rgba(63,158,110,.13),rgba(232,194,102,.1));border:1px solid rgba(63,158,110,.3);color:#2a6b46}
+
+.apply-scroll{max-height:540px;overflow:auto;border:1px solid var(--line-soft);border-radius:12px}
+.apply-table{width:100%;border-collapse:collapse;font-size:13px;color:var(--text)}
+.apply-table th{position:sticky;top:0;background:linear-gradient(180deg,#C8161D,#8e0f14);color:#fff;font-weight:700;
+  padding:10px 12px;text-align:left;font-size:12.5px;letter-spacing:.5px;white-space:nowrap;z-index:2}
+.apply-table td{padding:9px 12px;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+.apply-table tr:nth-child(even) td{background:rgba(200,22,29,.035)}
+.apply-table tr.row-fail td{background:rgba(200,22,29,.08)}
+.apply-table .num{font-variant-numeric:tabular-nums;font-weight:700}
+.apply-table .pos{color:var(--green);font-weight:800}
+.apply-table .neg{color:#C8161D;font-weight:800}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 11px;border-radius:11px;font-size:12px;font-weight:800;white-space:nowrap}
+.badge.ok{background:rgba(63,158,110,.14);color:#2a6b46;border:1px solid rgba(63,158,110,.35)}
+.badge.no{background:rgba(200,22,29,.12);color:#C8161D;border:1px solid rgba(200,22,29,.32)}
+
+.seal{display:inline-flex;align-items:center;justify-content:center;width:104px;height:104px;border-radius:50%;
+  border:3px solid #C8161D;color:#C8161D;font-weight:900;font-size:14px;line-height:1.3;text-align:center;
+  transform:rotate(-12deg);box-shadow:0 0 0 4px rgba(200,22,29,.08) inset;flex:0 0 104px;padding:8px}
+.seal.pass{border-color:#2a6b46;color:#2a6b46;box-shadow:0 0 0 4px rgba(63,158,110,.12) inset}
+.seal .st{font-size:11px;opacity:.85;display:block;margin-top:3px;font-weight:700}
+
+.grad-viewer{display:flex;flex-direction:column;gap:14px}
+.grad-sel{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-weight:700;color:var(--text);background:#fff}
+.grad-head{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.grad-name{font-size:17px;font-weight:800;color:var(--text)}
+.grad-org{font-size:12px;color:var(--muted);margin-top:2px}
+.grad-info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grad-idx{background:linear-gradient(160deg,rgba(200,22,29,.1),rgba(232,194,102,.12));border:1px solid var(--line-soft);border-radius:12px;padding:12px;text-align:center}
+.grad-idx .gl{font-size:12px;color:var(--muted);font-weight:700}
+.grad-idx .gv{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;background:linear-gradient(90deg,var(--red),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-top:4px}
+.grad-verdict{font-size:13px;line-height:1.85;color:var(--text);background:rgba(255,255,255,.6);border:1px solid var(--line-soft);border-radius:12px;padding:14px}
+
+/* 积分运用看板：面板与图表随行高填充，柱状图底部占满整个区域 */
+.apply-panel{display:flex;flex-direction:column}
+.apply-fill{flex:1;min-height:300px;width:100%}

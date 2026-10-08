@@ -598,6 +598,229 @@
       arr.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul></div>';
   }
 
+  /* ---------- 积分运用：阶段流转阈值与复合指标 ---------- */
+  var APPLY_TAB = "score";
+  var APPLY_CONF = { scoreLine: 60, dangxing: 70, zuoyong: 70 };
+
+  /* 党性锻炼指数 = (思想态度+学习成效)/40*100；作用发挥指数 = (日常表现+履职担当+工作实绩)/60*100 */
+  function dangxingIdx(p) { return num((p.scores["思想态度"] + p.scores["学习成效"]) / 40 * 100); }
+  function zuoyongIdx(p) { return num((p.scores["日常表现"] + p.scores["履职担当"] + p.scores["工作实绩"]) / 60 * 100); }
+
+  /* ---------- 视图：积分全方位运用（可视化看板） ---------- */
+  function renderApply() {
+    clearCharts();
+    var head =
+      '<div class="view-title"><span class="bar"></span><h1>积分全方位运用</h1>' +
+      '<span class="hint">凭分入围 · 阳光转正</span></div>' +
+      '<div class="apply-tabs">' +
+      '<button class="apply-tab' + (APPLY_TAB === "score" ? " active" : "") + '" data-tab="score">① 凭分入围（积极分子 → 发展对象）</button>' +
+      '<button class="apply-tab' + (APPLY_TAB === "grad" ? " active" : "") + '" data-tab="grad">② 阳光转正（预备党员 → 正式党员）</button>' +
+      '</div>';
+    $("#view").innerHTML = head + (APPLY_TAB === "score" ? applyScoreView() : applyGradView());
+    $all(".apply-tab").forEach(function (b) {
+      b.addEventListener("click", function () { APPLY_TAB = b.getAttribute("data-tab"); renderApply(); });
+    });
+    if (APPLY_TAB === "score") wireApplyScore(); else wireApplyGrad();
+  }
+
+  /* ===== 子视图 1：凭分入围（入党积极分子 → 发展对象） ===== */
+  function applyScoreView() {
+    var ps = STATE.people.filter(function (p) { return p.stage === "入党积极分子"; });
+    var line = APPLY_CONF.scoreLine;
+    var rows = ps.map(function (p) { return { p: p, gap: num(p.total - line) }; })
+      .sort(function (a, b) { return b.p.total - a.p.total; });
+    var pass = rows.filter(function (r) { return r.gap >= 0; }).length;
+    var fail = rows.length - pass;
+    var rate = rows.length ? Math.round(pass / rows.length * 1000) / 10 : 0;
+
+    var ctrl = '<div class="apply-ctrl"><div class="grp"><span class="lbl">发展对象入围线</span>' +
+      '<input class="apply-input" id="scoreLineInput" type="number" min="0" max="100" value="' + line + '"> <span class="lbl">分</span></div>' +
+      '<span class="apply-note">培养期总积分 = 五维之和（满分 100）；低于入围线者系统自动拦截，不得确定为发展对象。</span></div>';
+
+    var kpis = '<div class="grid kpi-row cols-4">' +
+      kpi("入党积极分子", rows.length, "人", "进入培养考察") +
+      kpi("已达入围线", pass, "人", "可确定为发展对象") +
+      kpi("未达标拦截", fail, "人", "自动锁定下一环节") +
+      kpi("入围率", rate, "%", "达标占比") + '</div>';
+
+    var banner = fail > 0
+      ? '<div class="apply-banner stop"><span class="bi">⛔</span><div>系统已自动拦截 <b>' + fail + '</b> 名未达入围线（' + line + ' 分）的入党积极分子，<b>不得进入发展对象确定环节</b>，从源头保证优中选优。</div></div>'
+      : '<div class="apply-banner go"><span class="bi">✅</span><div>全部入党积极分子均达入围线，可进入发展对象确定环节。</div></div>';
+
+    var chart = '<div class="grid cols-2">' +
+      '<div class="panel"><div class="panel-head"><span class="t">培养期总积分 · 凭分入围校验</span><span class="sub">红金=达标 灰=拦截</span></div>' +
+      '<div id="cScoreBar" class="chart" style="height:' + (rows.length * 26 + 64) + 'px"></div></div>' +
+      '<div class="panel"><div class="panel-head"><span class="t">阶段流转校验明细</span><span class="sub">实时核算</span></div>' +
+      '<div class="apply-scroll"><table class="apply-table"><thead><tr><th>姓名</th><th>单位</th><th>培养期总积分</th><th>距入围线</th><th>状态</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        var ok = r.gap >= 0;
+        return '<tr class="' + (ok ? "" : "row-fail") + '"><td>' + esc(r.p.name) + '</td><td>' + esc(countyShort(r.p.county)) + '</td>' +
+          '<td class="num">' + r.p.total + '</td>' +
+          '<td class="num ' + (ok ? "pos" : "neg") + '">' + (ok ? "+" : "") + r.gap + '</td>' +
+          '<td>' + (ok ? '<span class="badge ok">✓ 可入围</span>' : '<span class="badge no">✗ 拦截</span>') + '</td></tr>';
+      }).join("") + '</tbody></table></div></div></div>';
+
+    return ctrl + kpis + banner + chart;
+  }
+
+  function wireApplyScore() {
+    var inp = $("#scoreLineInput");
+    if (inp) inp.addEventListener("input", function () {
+      var v = Number(inp.value); if (!isFinite(v)) return;
+      var pos = inp.selectionStart;
+      APPLY_CONF.scoreLine = Math.max(0, Math.min(100, Math.round(v)));
+      renderApply();
+      var ni = $("#scoreLineInput"); if (ni) { ni.focus(); try { ni.setSelectionRange(pos, pos); } catch (e) {} }
+    });
+    var ps = STATE.people.filter(function (p) { return p.stage === "入党积极分子"; });
+    var line = APPLY_CONF.scoreLine;
+    var rows = ps.map(function (p) { return { p: p, gap: num(p.total - line) }; })
+      .sort(function (a, b) { return b.p.total - a.p.total; });
+    if (!rows.length) return;
+    makeChart("cScoreBar", {
+      animation: true, animationDuration: 900, animationEasing: "cubicOut",
+      grid: { left: 8, right: 44, top: 16, bottom: 8, containLabel: true },
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" },
+        formatter: function (ps) { var r = rows[ps[0].dataIndex]; return esc(r.p.name) + "<br/>培养期总积分：<b>" + r.p.total + "</b> / 100<br/>距入围线：" + (r.gap >= 0 ? "+" : "") + r.gap; } },
+      xAxis: Object.assign({ type: "value", max: 100, name: "积分", nameTextStyle: { color: "#8A6A52", fontSize: 12 } }, axisStyle()),
+      yAxis: { type: "category", data: rows.map(function (r) { return r.p.name; }),
+        axisLine: { lineStyle: { color: "rgba(200,22,29,.30)" } }, axisLabel: { color: "#3A1418", fontSize: 13 } },
+      series: [{
+        type: "bar", barWidth: "62%",
+        data: rows.map(function (r) {
+          return { value: r.p.total, itemStyle: { borderRadius: [0, 6, 6, 0],
+            color: r.gap >= 0
+              ? new echarts.graphic.LinearGradient(0, 0, 1, 0, [{ offset: 0, color: C1 }, { offset: 1, color: C5 }])
+              : "#C2A98F" } };
+        }),
+        label: { show: true, position: "right", color: "#3A1418", fontSize: 13, fontWeight: 700, formatter: function (d) { return d.value; } },
+        markLine: { silent: true, symbol: "none",
+          lineStyle: { color: "#C8161D", width: 2, type: "dashed" },
+          label: { color: "#C8161D", fontSize: 12, fontWeight: 700, formatter: "入围线 " + line },
+          data: [{ xAxis: line }] }
+      }]
+    });
+  }
+
+  /* ===== 子视图 2：阳光转正（预备党员 → 正式党员） ===== */
+  function applyGradView() {
+    var ps = STATE.people.filter(function (p) { return p.stage === "预备党员"; });
+    var dx = APPLY_CONF.dangxing, zy = APPLY_CONF.zuoyong;
+    var rows = ps.map(function (p) {
+      var d = dangxingIdx(p), z = zuoyongIdx(p);
+      return { p: p, d: d, z: z, pass: d >= dx && z >= zy };
+    });
+    var nDx = rows.filter(function (r) { return r.d >= dx; }).length;
+    var nZy = rows.filter(function (r) { return r.z >= zy; }).length;
+    var nPass = rows.filter(function (r) { return r.pass; }).length;
+
+    var ctrl = '<div class="apply-ctrl"><div class="grp"><span class="lbl">党性锻炼达标线</span>' +
+      '<input class="apply-input" id="dxInput" type="number" min="0" max="100" value="' + dx + '"></div>' +
+      '<div class="grp"><span class="lbl">作用发挥达标线</span>' +
+      '<input class="apply-input" id="zyInput" type="number" min="0" max="100" value="' + zy + '"></div>' +
+      '<span class="apply-note">党性锻炼指数=(思想态度+学习成效)/40×100，作用发挥指数=(日常表现+履职担当+工作实绩)/60×100，党性锻炼与作用发挥双达标方可提交支部大会表决。</span></div>';
+
+    var kpis = '<div class="grid kpi-row cols-4">' +
+      kpi("预备党员", rows.length, "人", "预备考察期") +
+      kpi("党性锻炼达标", nDx, "人", "≥ " + dx + " 分") +
+      kpi("作用发挥达标", nZy, "人", "≥ " + zy + " 分") +
+      kpi("可提交转正表决", nPass, "人", "双指标达标") + '</div>';
+
+    var banner = nPass < rows.length
+      ? '<div class="apply-banner stop"><span class="bi">🛡</span><div>系统判定 <b>' + (rows.length - nPass) + '</b> 名预备党员党性锻炼或作用发挥未达转正标准，<b>暂不符合转正条件</b>，需继续考察；其余 <b>' + nPass + '</b> 名可生成全景画像并提交支部大会表决。</div></div>'
+      : '<div class="apply-banner go"><span class="bi">✅</span><div>全部预备党员双指标达标，均可生成《预备党员积分全景画像》并提交支部大会表决。</div></div>';
+
+    var chart = '<div class="grid cols-2" style="margin-top:16px">' +
+      '<div class="panel apply-panel"><div class="panel-head"><span class="t">党性锻炼 / 作用发挥 监测</span><span class="sub">虚线=达标线</span></div>' +
+      '<div id="cGradBar" class="chart apply-fill"></div></div>' +
+      '<div class="panel apply-panel"><div class="panel-head"><span class="t">《预备党员积分全景画像》</span><span class="sub">自动生成 · 表决依据</span></div>' +
+      '<div class="grad-viewer apply-fill"><select class="grad-sel" id="gradSel">' +
+      rows.map(function (r) { return '<option value="' + r.p.id + '">' + esc(r.p.name) + '（' + esc(countyShort(r.p.county)) + '）</option>'; }).join("") +
+      '</select><div id="gradPortrait"></div></div></div></div>' +
+      '<div class="panel" style="margin-top:16px"><div class="panel-head"><span class="t">阶段流转校验 · 转正监测看板</span><span class="sub">实时核算</span></div>' +
+      '<div class="apply-scroll"><table class="apply-table"><thead><tr><th>姓名</th><th>单位</th><th>党性锻炼</th><th>作用发挥</th><th>培养期总分</th><th>表决依据</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        return '<tr class="' + (r.pass ? "" : "row-fail") + '"><td>' + esc(r.p.name) + '</td><td>' + esc(countyShort(r.p.county)) + '</td>' +
+          '<td class="num ' + (r.d >= dx ? "pos" : "neg") + '">' + r.d + '</td>' +
+          '<td class="num ' + (r.z >= zy ? "pos" : "neg") + '">' + r.z + '</td>' +
+          '<td class="num">' + r.p.total + '</td>' +
+          '<td>' + (r.pass ? '<span class="badge ok">✓ 可表决</span>' : '<span class="badge no">✗ 不符</span>') + '</td></tr>';
+      }).join("") + '</tbody></table></div></div>';
+
+    return ctrl + kpis + banner + chart;
+  }
+
+  function wireApplyGrad() {
+    var dx = APPLY_CONF.dangxing, zy = APPLY_CONF.zuoyong;
+    var ps = STATE.people.filter(function (p) { return p.stage === "预备党员"; });
+    var rows = ps.map(function (p) {
+      var d = dangxingIdx(p), z = zuoyongIdx(p);
+      return { p: p, d: d, z: z };
+    });
+    if (rows.length) {
+      var gc = makeChart("cGradBar", {
+        animation: true, animationDuration: 900, animationEasing: "cubicOut",
+        tooltip: { trigger: "axis" },
+        legend: { data: ["党性锻炼指数", "作用发挥指数"], textStyle: { color: "#3A1418", fontSize: 13 }, top: 0, itemWidth: 16, itemHeight: 9 },
+        grid: { left: 8, right: 16, top: 40, bottom: 8, containLabel: true },
+        xAxis: { type: "category", data: rows.map(function (r) { return r.p.name; }),
+          axisLine: { lineStyle: { color: "rgba(200,22,29,.30)" } }, axisLabel: { color: "#8A6A52", fontSize: 12, interval: 0, rotate: 38 } },
+        yAxis: Object.assign({ type: "value", max: 100, name: "指数", nameTextStyle: { color: "#8A6A52", fontSize: 12 } }, axisStyle()),
+        series: [
+          { name: "党性锻炼指数", type: "bar", barWidth: "32%", data: rows.map(function (r) { return r.d; }),
+            itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: C1 }, { offset: 1, color: "#E86A3C" }]), borderRadius: [4, 4, 0, 0] },
+            label: Object.assign({}, BAR_LABEL, { fontSize: 11 }),
+            markLine: { silent: true, symbol: "none", lineStyle: { color: "#C8161D", width: 2, type: "dashed" },
+              label: { color: "#C8161D", fontSize: 11, formatter: "党性线 " + dx }, data: [{ yAxis: dx }] } },
+          { name: "作用发挥指数", type: "bar", barWidth: "32%", data: rows.map(function (r) { return r.z; }),
+            itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: C2 }, { offset: 1, color: "#E8C266" }]), borderRadius: [4, 4, 0, 0] },
+            label: Object.assign({}, BAR_LABEL, { fontSize: 11 }),
+            markLine: { silent: true, symbol: "none", lineStyle: { color: "#9a6b00", width: 2, type: "dashed" },
+              label: { color: "#9a6b00", fontSize: 11, formatter: "作用线 " + zy }, data: [{ yAxis: zy }] } }
+        ]
+      });
+      if (gc) { gc.resize(); requestAnimationFrame(function () { gc.resize(); }); }
+    }
+
+    function renderPortrait(id) {
+      var p = getPerson(id); if (!p) return;
+      var d = dangxingIdx(p), z = zuoyongIdx(p);
+      var ok = d >= dx && z >= zy;
+      var verdict = ok
+        ? "经系统核算，该同志预备期 <b>党性锻炼指数 " + d + "</b>、<b>作用发挥指数 " + z + "</b>，两项均达转正标准（党性≥" + dx + "、作用≥" + zy + "），建议提交支部大会无记名表决。"
+        : "该同志预备期" + (d < dx ? " <b>党性锻炼指数 " + d + "</b> 未达 " + dx + " 线；" : "") + (z < zy ? " <b>作用发挥指数 " + z + "</b> 未达 " + zy + " 线；" : "") + "暂不符合转正条件，需继续考察培养。";
+      $("#gradPortrait").innerHTML =
+        '<div class="grad-head"><div><div class="grad-name">' + esc(p.name) + '</div><div class="grad-org">' + esc(p.org) + ' · ' + esc(countyShort(p.county)) + '</div></div>' +
+        '<div class="seal ' + (ok ? "pass" : "") + '">' + (ok ? "建议提交<span class=\"st\">支部大会表决</span>" : "暂不符合<span class=\"st\">需继续考察</span>") + '</div></div>' +
+        '<div class="grad-info">' +
+        '<div class="grad-idx"><div class="gl">党性锻炼指数</div><div class="gv">' + d + '</div></div>' +
+        '<div class="grad-idx"><div class="gl">作用发挥指数</div><div class="gv">' + z + '</div></div>' +
+        '<div class="grad-idx"><div class="gl">培养期总分</div><div class="gv">' + p.total + '</div></div>' +
+        '</div>' +
+        '<div id="cGradRadar" class="chart h300"></div>' +
+        '<div class="grad-verdict">' + verdict + '</div>';
+      makeChart("cGradRadar", radarOption([p]));
+    }
+
+    var sel = $("#gradSel");
+    if (sel && rows.length) {
+      renderPortrait(Number(sel.value));
+      sel.addEventListener("change", function () { renderPortrait(Number(sel.value)); });
+    }
+    function onConf() {
+      var act = document.activeElement && document.activeElement.id;
+      var a = Number($("#dxInput").value), b = Number($("#zyInput").value);
+      if (isFinite(a)) APPLY_CONF.dangxing = Math.max(0, Math.min(100, Math.round(a)));
+      if (isFinite(b)) APPLY_CONF.zuoyong = Math.max(0, Math.min(100, Math.round(b)));
+      renderApply();
+      var el = document.getElementById(act); if (el) { try { var pos = el.selectionStart; el.focus(); el.setSelectionRange(pos, pos); } catch (e) { el.focus(); } }
+    }
+    var dxI = $("#dxInput"), zyI = $("#zyInput");
+    if (dxI) dxI.addEventListener("input", onConf);
+    if (zyI) zyI.addEventListener("input", onConf);
+  }
+
+
   /* ---------- 视图：数据管理 ---------- */
   function renderManage() {
     var n = STATE.people.length;
@@ -646,6 +869,7 @@
     else if (h === "profile") renderProfile();
     else if (h === "rank") renderRank();
     else if (h === "rules") renderRules();
+    else if (h === "apply") renderApply();
     else if (h === "manage") renderManage();
     else renderOverview();
     $("#view").scrollTop = 0;
